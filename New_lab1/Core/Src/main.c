@@ -31,6 +31,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -39,9 +40,9 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-
 /* USER CODE BEGIN PV */
 uint8_t button_state = 0;
+int clockwise = 1; // Flag to track the lighting direction
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -62,53 +63,38 @@ void MX_GPIO_Init(void);
   */
 int main(void)
 {
-  /* USER CODE BEGIN 1 */
-
-  /* USER CODE END 1 */
-
   /* MCU Configuration--------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
-
-  /* Configure the system clock */
   SystemClock_Config();
-
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
-
-  /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  /* USER CODE BEGIN 2 */
 
-  /* USER CODE END 2 */
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
   while (1)
   {
-      // Проверяем состояние кнопки
       if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_SET) {
           button_state = 1;
       } else {
           button_state = 0;
       }
 
-      // Если кнопка нажата, зажигаем светодиоды
       if (button_state == 1) {
+          clockwise = !clockwise;
+          HAL_Delay(100);
+      }
+
+      if (clockwise) {
           for(int i = 12; i <= 15; i++) {
-              HAL_GPIO_TogglePin(GPIOD, (1 << i)); // Зажигание светодиода
-              HAL_Delay(500);  // Пауза 500 мсек
-              HAL_GPIO_TogglePin(GPIOD, (1 << i)); // Гашение светодиода
+              HAL_GPIO_TogglePin(GPIOD, (1 << i));
+              HAL_Delay(500);
+              HAL_GPIO_TogglePin(GPIOD, (1 << i));
+          }
+      } else {
+          for(int i = 15; i >= 12; i--) {
+              HAL_GPIO_TogglePin(GPIOD, (1 << i));
+              HAL_Delay(500);
+              HAL_GPIO_TogglePin(GPIOD, (1 << i));
           }
       }
   }
-  /* USER CODE END 3 */
 }
 
 /**
@@ -185,7 +171,6 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
-
 }
 
 /* USER CODE BEGIN 4 */
@@ -198,13 +183,11 @@ void MX_GPIO_Init(void)
   */
 void Error_Handler(void)
 {
-  /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
   while (1)
   {
   }
-  /* USER CODE END Error_Handler_Debug */
 }
 
 #ifdef  USE_FULL_ASSERT
@@ -217,9 +200,7 @@ void Error_Handler(void)
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
