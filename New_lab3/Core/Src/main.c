@@ -1,8 +1,8 @@
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
+  * @file    main.c
+  * @brief   Main program body
   ******************************************************************************
   * @attention
   *
@@ -31,7 +31,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-uint8_t taskState = 0; // Initialize task state variable
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -41,6 +40,9 @@ uint8_t taskState = 0; // Initialize task state variable
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
+
+/* Define taskState to switch between tasks */
+uint8_t taskState = 0;
 
 /* USER CODE END PV */
 
@@ -62,63 +64,52 @@ static void MX_GPIO_Init(void);
   */
 int main(void)
 {
-  /* USER CODE BEGIN 1 */
-
-  /* USER CODE END 1 */
-
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
-
   /* Configure the system clock */
   SystemClock_Config();
 
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
-
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  /* USER CODE BEGIN 2 */
-
-  /* USER CODE END 2 */
 
   /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
   while (1)
   {
+    /* Check if taskState is 0 (normal task) */
     if (taskState == 0)
     {
-      // Task 1: Handle main task
-      HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
-      HAL_Delay(500);
-      HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
-      HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
-      HAL_Delay(500);
-      HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
-      HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-      HAL_Delay(500);
-      HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+      /* Normal task code here */
       HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
       HAL_Delay(500);
       HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
+      HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+      HAL_Delay(500);
+      HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+      HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
+      HAL_Delay(500);
+      HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
+      HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+      HAL_Delay(500);
+      HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
     }
     else
     {
-      // Task 2: Handle interrupt task (if any)
-      // Add code for interrupt task here
+      /* Priority task code here */
+      // Example: Blink LED faster
+      HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+      HAL_Delay(100);
+      HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+      HAL_Delay(100);
     }
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
   }
-  /* USER CODE END 3 */
 }
+
+/* USER CODE BEGIN 1 */
+
+/* USER CODE END 1 */
 
 /**
   * @brief System Clock Configuration
@@ -152,8 +143,8 @@ void SystemClock_Config(void)
 
   /** Initializes the CPU, AHB and APB buses clocks
   */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK |
+                                RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
@@ -180,16 +171,16 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : PA0 */
+  /*Configure GPIO pins : PA0 */
   GPIO_InitStruct.Pin = GPIO_PIN_0;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PD12 PD13 PD14 PD15 */
-  GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
+  GPIO_InitStruct.Pin = GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -198,11 +189,21 @@ static void MX_GPIO_Init(void)
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+
+  /*Configure GPIO pin : PA1 */
+  GPIO_InitStruct.Pin = GPIO_PIN_1;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI1_IRQn, 1, 0);
+  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
 }
 
-/* USER CODE BEGIN 4 */
+/* USER CODE BEGIN 2 */
 
-/* USER CODE END 4 */
+/* USER CODE END 2 */
 
 /**
   * @brief  This function is executed in case of error occurrence.
@@ -212,7 +213,6 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
   while (1)
   {
   }
@@ -231,7 +231,8 @@ void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+     tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+
