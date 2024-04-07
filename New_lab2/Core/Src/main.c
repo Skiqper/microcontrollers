@@ -31,6 +31,11 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define BUTTON_PIN GPIO_PIN_0
+#define LED1_PIN GPIO_PIN_12
+#define LED2_PIN GPIO_PIN_13
+#define LED3_PIN GPIO_PIN_14
+#define LED4_PIN GPIO_PIN_15
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -84,11 +89,8 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-  uint32_t i;
-  RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN;
-  GPIOD->MODER = 0x55000000;
-  GPIOD->OTYPER = 0;
-  GPIOD->OSPEEDR = 0;
+  uint8_t buttonState = GPIO_PIN_RESET;
+  uint8_t lastButtonState = GPIO_PIN_RESET;
 
   /* USER CODE END 2 */
 
@@ -98,15 +100,23 @@ int main(void)
   {
     /* USER CODE END WHILE */
 
-    GPIOD->ODR = GPIO_PIN_12;
-    HAL_Delay(100);
-    GPIOD->ODR = GPIO_PIN_13;
-    HAL_Delay(100);
-    GPIOD->ODR = GPIO_PIN_14;
-    HAL_Delay(100);
-    GPIOD->ODR = GPIO_PIN_15;
-    HAL_Delay(100);
-    GPIOD->ODR = 0;
+    buttonState = HAL_GPIO_ReadPin(GPIOA, BUTTON_PIN);
+
+    if (buttonState == GPIO_PIN_SET && lastButtonState == GPIO_PIN_RESET)
+    {
+
+        GPIOD->ODR = GPIO_PIN_12;
+        HAL_Delay(500);
+        GPIOD->ODR = GPIO_PIN_13;
+        HAL_Delay(500);
+        GPIOD->ODR = GPIO_PIN_14;
+        HAL_Delay(500);
+        GPIOD->ODR = GPIO_PIN_15;
+        HAL_Delay(500);
+        GPIOD->ODR = 0;
+    }
+
+    lastButtonState = buttonState;
 
     /* USER CODE BEGIN 3 */
   }
@@ -169,10 +179,16 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOD, LED1_PIN|LED2_PIN|LED3_PIN|LED4_PIN, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : PA0 */
+  GPIO_InitStruct.Pin = BUTTON_PIN;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PD12 PD13 PD14 PD15 */
-  GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
+  GPIO_InitStruct.Pin = LED1_PIN|LED2_PIN|LED3_PIN|LED4_PIN;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
