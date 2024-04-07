@@ -41,7 +41,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+uint8_t button_state = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -92,10 +92,20 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-      for(int i = 12; i <= 15; i++) {
-          HAL_GPIO_TogglePin(GPIOD, (1 << i)); // Зажигание светодиода
-          HAL_Delay(500);  // Пауза 500 мсек
-          HAL_GPIO_TogglePin(GPIOD, (1 << i)); // Гашение светодиода
+      // Проверяем состояние кнопки
+      if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_SET) {
+          button_state = 1;
+      } else {
+          button_state = 0;
+      }
+
+      // Если кнопка нажата, зажигаем светодиоды
+      if (button_state == 1) {
+          for(int i = 12; i <= 15; i++) {
+              HAL_GPIO_TogglePin(GPIOD, (1 << i)); // Зажигание светодиода
+              HAL_Delay(500);  // Пауза 500 мсек
+              HAL_GPIO_TogglePin(GPIOD, (1 << i)); // Гашение светодиода
+          }
       }
   }
   /* USER CODE END 3 */
@@ -163,8 +173,8 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : PA1 PA2 */
-  GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_2;
+  /*Configure GPIO pins : PA0 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
