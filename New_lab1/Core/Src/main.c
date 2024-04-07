@@ -43,6 +43,7 @@
 /* USER CODE BEGIN PV */
 uint8_t button_state = 0;
 int clockwise = 1; // Flag to track the lighting direction
+int mode = 0; // Variable to track the mode (frequency)
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -77,20 +78,27 @@ int main(void)
       }
 
       if (button_state == 1) {
-          clockwise = !clockwise;
+          mode = (mode + 1) % 3;
           HAL_Delay(100);
+      }
+
+      int delay_ms = 500;
+      if (mode == 1) {
+          delay_ms = 250;
+      } else if (mode == 2) {
+          delay_ms = 100;
       }
 
       if (clockwise) {
           for(int i = 12; i <= 15; i++) {
               HAL_GPIO_TogglePin(GPIOD, (1 << i));
-              HAL_Delay(500);
+              HAL_Delay(delay_ms);
               HAL_GPIO_TogglePin(GPIOD, (1 << i));
           }
       } else {
           for(int i = 15; i >= 12; i--) {
               HAL_GPIO_TogglePin(GPIOD, (1 << i));
-              HAL_Delay(500);
+              HAL_Delay(delay_ms);
               HAL_GPIO_TogglePin(GPIOD, (1 << i));
           }
       }
